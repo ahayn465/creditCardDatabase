@@ -1,0 +1,207 @@
+package userInterface;
+
+
+
+import database.Account;
+import manipulator.DatabaseManipulator;
+import manipulator.ScriptRunner;
+
+
+/**
+ * Handles all IO operations. View section of the program takes user input and tells controller what to do. 
+ * 
+ * @author Amanda Hill
+ *
+ */
+public class UserIO {
+
+	private Menu menu;	
+	private DatabaseManipulator dataManip;
+	private ConsoleCom com;
+
+	ScriptRunner script; 
+
+
+	public UserIO()
+	{
+		com = new ConsoleCom();
+		menu = new Menu();
+			addMenuOptions();
+		dataManip = new DatabaseManipulator();
+
+		script = new ScriptRunner(dataManip);
+
+	}
+
+	/**
+	 * Adds desired menu options to the current menu. 
+	 */
+	public void addMenuOptions()
+	{
+		menu.addMenuOption( new MenuOption("A", "add account") );
+		menu.addMenuOption( new MenuOption("D", "delete account") );
+		menu.addMenuOption( new MenuOption("L", "adjust credit limit") );
+		menu.addMenuOption( new MenuOption("P", "make purchase") );
+		menu.addMenuOption( new MenuOption("S", "print single account") );
+		menu.addMenuOption( new MenuOption("E", "print entire account database") );
+		menu.addMenuOption( new MenuOption("O", "request database operations") );
+		menu.addMenuOption( new MenuOption("Q", "quit") );
+	}
+
+	/**
+	 * The main flow of the program. Continues to display the menu until the user chooses to quit.
+	 * 
+	 */
+	public void run() 
+	{
+
+		MenuOption choice = null;
+		do
+		{
+			choice = menu.getUserChoice();
+			executeUserChoice(choice);
+		}
+		while(!choice.isAMatch("q"));	//while the user does not want to quit
+	}
+
+	/**
+	 * Executes the given menu choice.
+	 * 
+	 * @param choice the menuOption
+	 */
+	private void executeUserChoice(MenuOption choice) 
+
+	{
+		if(choice.isAMatch("a")) createAccount();
+		else if(choice.isAMatch("d")) deleteAccount();
+		else if(choice.isAMatch("l")) changeCreditLimit(); 
+		else if(choice.isAMatch("p")) makePurchase(); 
+		else if(choice.isAMatch("s")) printOneAccount();
+		else if(choice.isAMatch("e")) 
+			{
+			dataManip.printAllAccounts();
+			com.pauseUntilHitEnter();	//waits until the user hits enter to display the menu again
+			}
+		else if(choice.isAMatch("o")) script.runScript();
+	}
+
+	/**
+	 * Manually creates an account with user input. 
+	 */
+	public void createAccount()
+	{
+		String name = com.getInputString("Enter the name: ");
+		String accNumber = com.getInputString("Enter account number: ");
+		double limit = com.getInputDouble("Enter credit limit: ");
+		double balance = com.getInputDouble("Enter balance: ");
+
+		Account act = new Account(name, accNumber, limit, balance);
+		if(!dataManip.addAccount(act))
+			com.println("account already exists ");
+	}
+	
+	/**
+	 * Returns a string representation of the card number to remove
+	 * @return
+	 */
+	private String getRemoveAccount()
+	{
+		return com.getInputString("enter the card number to remove: ");
+	}
+	
+	/**
+	 * Tells the controller to delete an account. Prints an error to the screen if the account does not exist. 
+	 */
+	private void deleteAccount()
+	{
+		boolean success = dataManip.deleteAccount(getRemoveAccount()); //TODO confirm delete
+				if (!success)
+					com.println("error: that account does not exist");
+	}
+
+	/**
+	 * Tells the controller to change the credit limit on an account. Gets the account number and new credit 
+	 * limit and passes that information to the controller to manipulate the account. Prints an error to the 
+	 * screen if the new limit is less than the current balance
+	 */
+	public void changeCreditLimit()
+	{
+		String key = com.getInputString("enter the card number to change the limit on ");
+		double newLimit = com.getInputDouble("enter the new credit limit ");
+		
+		boolean success = dataManip.changeLimit(key, newLimit);
+		if (!success)
+			com.println("error: new limit is less than current balance ");
+	}
+
+	/**
+	 * Tells the controller to make a purchase on an account. Asks the user for the account number and the purchase
+	 * amount and passes that information to the controller. Prints an error to the console if the purchase 
+	 * is greater than the available credit or if the user tries to make a purchase with a negative amount. 
+	 */
+	public void makePurchase()
+	{
+		String key = com.getInputString("enter the card number to make a purchase on ");
+		double purchaseAmount = com.getInputDouble("enter the purchase amount ");
+		boolean success = false;
+	
+		if(purchaseAmount > 0)
+			success = dataManip.makePurchase(key, purchaseAmount);
+				if(!success)	//not enough credit to make a purchase
+					com.println("error: insufficient credit ");
+		else
+			com.println("haha... good try!");
+	}
+	
+	/**
+	 * Gets the card number for an account in the database and passes it to the controller to print to
+	 * the console 
+	 */
+	public void printOneAccount()
+	{
+		String key = com.getInputString("enter the card number for the account to print ");
+		dataManip.printOneAccount(key);
+	}
+	
+	/**
+	 * Wrapper method asks the user for the name of a file to open
+	 * 
+	 * @return the file name
+	 */
+	public String getFileName()
+	{
+		return com.getInputString("enter name of file");
+	}
+
+
+	/**
+	 * Wrapper method gets a String input from the user
+	 * @param message the prompt to display
+	 * @return user input
+	 */
+	public String getString(String message)
+	{
+		return com.getInputString(message);
+	}
+
+
+	/**
+	 * Wrapper method to get adouble input from the user
+	 * @param message the prompt to display
+	 * @return user input
+	 */
+	public Double getDouble(String message)
+	{
+		return com.getInputDouble(message);
+	}
+
+	/**
+	 * Wrapper method to print to the console
+	 * @param msg the message to display
+	 */
+	public void print(String msg)
+	{
+		com.print(msg);
+	}
+
+}

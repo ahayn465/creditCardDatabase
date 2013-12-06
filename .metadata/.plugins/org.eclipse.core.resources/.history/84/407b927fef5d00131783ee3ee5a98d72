@@ -1,0 +1,141 @@
+package userInterface;
+
+
+import java.io.IOException;
+
+import database.Account;
+import manipulator.DatabaseManipulator;
+import manipulator.ScriptRunner;
+
+
+public class UserIO {
+
+	private Menu menu;	
+	private DatabaseManipulator dataManip;
+	private ConsoleCom com;
+
+	ScriptRunner script; 
+
+
+	public UserIO()
+	{
+		com = new ConsoleCom();
+		menu = new Menu();
+		addMenuOptions();
+		dataManip = new DatabaseManipulator();
+
+		script = new ScriptRunner(dataManip);
+
+	}
+
+	public void addMenuOptions()
+	{
+		menu.addMenuOption( new MenuOption("a", "add account") );
+		menu.addMenuOption( new MenuOption("d", "delete account") );
+		menu.addMenuOption( new MenuOption("l", "adjust credit limit") );
+		menu.addMenuOption( new MenuOption("p", "make purchase") );
+		menu.addMenuOption( new MenuOption("s", "print single account") );
+		menu.addMenuOption( new MenuOption("e", "print entire account database") );
+		menu.addMenuOption( new MenuOption("o", "request database operations") );
+		menu.addMenuOption( new MenuOption("q", "quit") );
+	}
+
+
+	private void executeUserChoice(MenuOption choice) throws IOException
+
+	{
+		if(choice.isAMatch("a")) createAccount();
+		else if(choice.isAMatch("d")) dataManip.deleteAccount(getRemoveAccount()); //TODO confirm delete
+		else if(choice.isAMatch("l")) changeCreditLimit(); ///TODO change to not take input
+		else if(choice.isAMatch("p")) makePurchase(); //TODO change to have input in UserIO
+		else if(choice.isAMatch("s")) printOneAccount();
+		else if(choice.isAMatch("e")) 
+			{
+			dataManip.printAllAccounts();
+			com.pauseUntilHitEnter();
+			
+			}
+
+		else if(choice.isAMatch("o")) script.runScript();
+	}
+
+
+	public void run() throws IOException
+	{
+
+		MenuOption choice = null;
+		do
+		{
+			choice = menu.getUserChoice();
+			executeUserChoice(choice);
+		}
+		while(!choice.isAMatch("q"));
+	}
+
+	public void createAccount()
+	{
+		String name = com.getInputString("Enter the name: ");
+		String accNumber = com.getInputString("Enter account number: ");
+		double limit = com.getInputDouble("Enter credit limit: ");
+		double balance = com.getInputDouble("Enter balance: ");
+
+		Account act = new Account(name, accNumber, limit, balance);
+		if(!dataManip.addAccount(act))
+			com.print("account already exists ");
+	}
+	
+	public String getRemoveAccount()
+	{
+		return com.getInputString("enter the card number to remove: ");
+
+	}
+
+	public void changeCreditLimit()
+	{
+		String key = com.getInputString("enter the card number to change the limit on ");
+		double newLimit = com.getInputDouble("enter the new credit limit ");
+		
+		
+		dataManip.changeLimit(key, newLimit);
+	}
+
+	public void makePurchase()
+	{
+		String key = com.getInputString("enter the card number to make a purchase on ");
+		double purchaseAmount = com.getInputDouble("enter the purchase amount ");
+		if(purchaseAmount > 0)
+			dataManip.makePurchase(key, purchaseAmount);
+		else
+			com.print("haha... good try!");
+	}
+	
+	public void printOneAccount()
+	{
+		String key = com.getInputString("enter the card number for the account to print ");
+		dataManip.printOneAccount(key);
+	}
+	
+	public String getFileName()
+	{
+		
+		return com.getInputString("enter name of file");
+	}
+
+
+	public String getString(String message)
+	{
+		return com.getInputString(message);
+	}
+
+
+	public Double getDouble(String message)
+	{
+		return com.getInputDouble(message);
+	}
+
+	public void print(String msg)
+	{
+		com.print(msg);
+	}
+
+}

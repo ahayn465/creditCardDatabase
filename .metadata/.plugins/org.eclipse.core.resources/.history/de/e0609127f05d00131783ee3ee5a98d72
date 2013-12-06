@@ -1,0 +1,105 @@
+/**
+ * 
+ */
+package manipulator;
+
+import java.io.*;
+import java.util.Scanner;
+
+import database.Account;
+import userInterface.ConsoleCom;
+
+/**
+ * @author amandahill
+ *
+ */
+public class ScriptRunner {
+
+	private DatabaseManipulator scriptManip;
+	private ConsoleCom com = new ConsoleCom();
+
+
+	public ScriptRunner(DatabaseManipulator scriptManip)
+	{
+		this.scriptManip = scriptManip;
+
+	}
+
+	public Scanner openFile() throws IOException 
+	{
+
+		FileReader file = null;
+		Scanner fileReader = null;
+	
+		
+		String fileName = com.getInputString("enter file name: ");
+		file = new FileReader(fileName); 
+		fileReader = new Scanner(file);
+		
+		return fileReader;
+		
+	}
+
+
+	public void runScript() throws IOException
+	{
+		Scanner inputStream = openFile();
+
+		while(inputStream.hasNext())
+		{
+			String line = inputStream.nextLine();
+			int doThis = 0;
+			
+			if(line == "cre")
+				doThis = 1;
+			else if(line == "del")
+				doThis = 2;
+			else if (line == "lim")
+				doThis = 3;
+			else if (line == "pur")
+				doThis = 4;
+
+			switch (doThis)
+			{
+			case 1:
+				String name = inputStream.nextLine();
+				String account = inputStream.nextLine();
+				String l = inputStream.nextLine();
+				double limit = Double.parseDouble(l);
+				String b = inputStream.nextLine();
+				double balance = Double.parseDouble(b);
+
+				Account newAccount = new Account (name, account, limit, balance);
+				scriptManip.addAccount(newAccount);
+				break;
+
+			case 2:	
+				String accountToDelete = inputStream.nextLine();
+				scriptManip.deleteAccount(accountToDelete);
+				break;
+
+			case 3:
+				String cardLim = inputStream.nextLine();
+				String lim = inputStream.nextLine();
+				double newLimit = Double.parseDouble(lim);
+
+				scriptManip.changeLimit(cardLim, newLimit);
+				break;
+
+			case 4:
+				String cardPur = inputStream.nextLine();
+				String a = inputStream.nextLine();
+				double amount = Double.parseDouble(a);
+
+				scriptManip.makePurchase(cardPur, amount);
+
+				break;
+
+			}
+
+		}
+
+	}
+}
+
+

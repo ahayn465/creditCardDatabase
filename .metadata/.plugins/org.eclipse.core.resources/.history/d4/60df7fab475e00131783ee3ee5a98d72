@@ -1,0 +1,169 @@
+package userInterface;
+
+
+import java.io.IOException;
+
+import database.Account;
+import manipulator.DatabaseManipulator;
+import manipulator.ScriptRunner;
+
+
+/**
+ * Handles all IO operations. 
+ * 
+ * @author Amanda Hill
+ *
+ */
+public class UserIO {
+
+	private Menu menu;	
+	private DatabaseManipulator dataManip;
+	private ConsoleCom com;
+
+	ScriptRunner script; 
+
+
+	public UserIO()
+	{
+		com = new ConsoleCom();
+		menu = new Menu();
+			addMenuOptions();
+		dataManip = new DatabaseManipulator();
+
+		script = new ScriptRunner(dataManip);
+
+	}
+
+	/**
+	 * Adds desired menu options to the current menu. 
+	 */
+	public void addMenuOptions()
+	{
+		menu.addMenuOption( new MenuOption("A", "add account") );
+		menu.addMenuOption( new MenuOption("D", "delete account") );
+		menu.addMenuOption( new MenuOption("L", "adjust credit limit") );
+		menu.addMenuOption( new MenuOption("P", "make purchase") );
+		menu.addMenuOption( new MenuOption("S", "print single account") );
+		menu.addMenuOption( new MenuOption("E", "print entire account database") );
+		menu.addMenuOption( new MenuOption("O", "request database operations") );
+		menu.addMenuOption( new MenuOption("Q", "quit") );
+	}
+
+
+	/**
+	 * Executes the given menu choice.
+	 * 
+	 * @param choice the menuOption
+	 */
+	private void executeUserChoice(MenuOption choice) 
+
+	{
+		if(choice.isAMatch("a")) createAccount();
+		else if(choice.isAMatch("d")) deleteAccount();
+		else if(choice.isAMatch("l")) changeCreditLimit(); 
+		else if(choice.isAMatch("p")) makePurchase(); 
+		else if(choice.isAMatch("s")) printOneAccount();
+		else if(choice.isAMatch("e")) 
+			{
+			dataManip.printAllAccounts();
+			com.pauseUntilHitEnter();	//waits until the user hits enter to display the menu again
+			}
+		else if(choice.isAMatch("o")) script.runScript();
+	}
+
+
+	/**
+	 * 
+	 * @throws IOException
+	 */
+	public void run() 
+	{
+
+		MenuOption choice = null;
+		do
+		{
+			choice = menu.getUserChoice();
+			executeUserChoice(choice);
+		}
+		while(!choice.isAMatch("q"));	//while the user does not want to quit
+	}
+
+	public void createAccount()
+	{
+		String name = com.getInputString("Enter the name: ");
+		String accNumber = com.getInputString("Enter account number: ");
+		double limit = com.getInputDouble("Enter credit limit: ");
+		double balance = com.getInputDouble("Enter balance: ");
+
+		Account act = new Account(name, accNumber, limit, balance);
+		if(!dataManip.addAccount(act))
+			com.println("account already exists ");
+	}
+	
+	public String getRemoveAccount()
+	{
+		return com.getInputString("enter the card number to remove: ");
+
+	}
+	
+	private void deleteAccount()
+	{
+		boolean success = dataManip.deleteAccount(getRemoveAccount()); //TODO confirm delete
+				if (!success)
+					com.println("that account does not exist");
+	}
+
+	public void changeCreditLimit()
+	{
+		String key = com.getInputString("enter the card number to change the limit on ");
+		double newLimit = com.getInputDouble("enter the new credit limit ");
+		
+		boolean success = dataManip.changeLimit(key, newLimit);
+		if (!success)
+			com.println("new limis less than balance ");
+	}
+
+	public void makePurchase()
+	{
+		String key = com.getInputString("enter the card number to make a purchase on ");
+		double purchaseAmount = com.getInputDouble("enter the purchase amount ");
+		boolean success = false;
+	
+		if(purchaseAmount > 0)
+			success = dataManip.makePurchase(key, purchaseAmount);
+				if(!success)	//not enough credit to make a purchase
+					com.println("insufficient credit ");
+		else
+			com.println("haha... good try!");
+	}
+	
+	public void printOneAccount()
+	{
+		String key = com.getInputString("enter the card number for the account to print ");
+		dataManip.printOneAccount(key);
+	}
+	
+	public String getFileName()
+	{
+		
+		return com.getInputString("enter name of file");
+	}
+
+
+	public String getString(String message)
+	{
+		return com.getInputString(message);
+	}
+
+
+	public Double getDouble(String message)
+	{
+		return com.getInputDouble(message);
+	}
+
+	public void print(String msg)
+	{
+		com.print(msg);
+	}
+
+}

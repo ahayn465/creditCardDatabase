@@ -1,0 +1,109 @@
+package manipulator;
+
+
+import database.Account;
+import java.util.ArrayList;
+import database.AccountDatabase;
+
+
+public class DatabaseManipulator {
+
+	AccountDatabase db;
+
+
+
+	public DatabaseManipulator()
+	{
+		db = new AccountDatabase();
+	}
+
+
+	public boolean addAccount(Account newAccount)
+	{
+		boolean result = false;
+
+		if(!db.containsKey(newAccount.getAccountNumber()))
+		{
+			db.add(newAccount.getAccountNumber(), newAccount);
+			result = true;
+		}
+
+		return result;		
+	}
+
+
+	public boolean deleteAccount(String key)
+	{
+		boolean success = true;
+		
+		if(db.containsKey(key))
+			db.remove(key); 
+		else
+			success = false;
+		
+		return success;
+	}
+
+	private Account getAccount(String key)
+	{
+		Account holder = null;
+
+		holder = db.find(key);
+
+		return holder;	
+	}
+
+	public boolean changeLimit(String key, double newCreditLimit)
+	{
+		boolean success = false;
+		Account actToChange = getAccount(key);
+
+		if(newCreditLimit > actToChange.getBalance())
+		{
+			actToChange.setCreditLimit(newCreditLimit);
+			success = true;
+		}
+
+		return success;
+	}	//TODO boolean flag for new limit more than balance
+
+	public boolean makePurchase(String key, double purchaseAmount)
+	{
+
+		Account purchaseAcct = getAccount(key);
+		boolean success = false;
+
+		if(purchaseAcct != null) //make sure there is an account with that number
+		{
+
+			double newBalance = purchaseAcct.getBalance() + purchaseAmount;
+
+			if(newBalance < purchaseAcct.getCreditLimit() )	//make sure the purchase is within the limit
+			{
+				purchaseAcct.setBalance(newBalance);
+				success = true;
+			}
+		}
+
+		return success;
+	} 
+
+	public void printOneAccount(String key)
+	{
+		Account acctToPrint = getAccount(key);
+		System.out.print(acctToPrint);
+	}
+
+	public void printAllAccounts()
+	{
+		ArrayList<Account> allAccounts = db.getSortedList();
+
+		for(Account acct: allAccounts)
+			System.out.print(acct);
+
+	}
+}
+
+
+
+

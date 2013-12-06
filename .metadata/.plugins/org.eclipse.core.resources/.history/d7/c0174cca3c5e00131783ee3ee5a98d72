@@ -1,0 +1,91 @@
+package manipulator;
+
+
+import database.Account;
+import java.util.ArrayList;
+import database.AccountDatabase;
+
+
+public class DatabaseManipulator {
+
+	AccountDatabase db;
+	
+	
+	
+	public DatabaseManipulator()
+	{
+		db = new AccountDatabase();
+	}
+	 
+	
+	public boolean addAccount(Account newAccount)
+	{
+       boolean result = false;
+		
+		if(!db.containsKey(newAccount.getAccountNumber()))
+		{
+		db.add(newAccount.getAccountNumber(), newAccount);
+		 result = true;
+		}
+		
+		return result;		
+	}
+		
+		
+	public void deleteAccount(String key)
+	{
+
+		db.remove(key); //TODO use boolean flag to print success message in IO
+
+		
+	} //TODO boolean flag for successful remove
+	
+	private Account getAccount(String key)
+	{
+		Account holder = null;
+	
+		holder = db.find(key);
+		
+		return holder;	
+	}
+	
+	public void changeLimit(String key, double newCreditLimit)
+	{
+		Account actToChange = getAccount(key);
+
+		if(newCreditLimit > actToChange.getBalance())
+		actToChange.setCreditLimit(newCreditLimit);
+	}	//TODO boolean flag for new limit more than balance
+
+	public void makePurchase(String key, double purchaseAmount)
+	{
+		
+		Account purchaseAcct = getAccount(key);
+		
+		double newBalance = purchaseAcct.getBalance() + purchaseAmount;
+		
+		if(newBalance < purchaseAcct.getCreditLimit() )
+		{
+			purchaseAcct.setBalance(newBalance);
+		}
+	} //TODO boolean flag for purchase under credit limit
+	
+	public void printOneAccount(String key)
+	{
+		Account acctToPrint = getAccount(key);
+		System.out.print(acctToPrint);
+	}
+	
+	public void printAllAccounts()
+	{
+		ArrayList<Account> allAccounts = db.getSortedList();
+		
+		for(Account acct: allAccounts)
+			System.out.print(acct);
+		
+	}
+}
+	
+
+
+

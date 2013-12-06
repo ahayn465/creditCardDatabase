@@ -1,0 +1,118 @@
+/**
+ * 
+ */
+package manipulator;
+
+import java.io.*;
+import java.util.Scanner;
+
+import database.Account;
+import userInterface.ConsoleCom;
+
+/**
+ * @author amandahill
+ *
+ */
+public class ScriptRunner {
+
+	private DatabaseManipulator scriptManip;
+	private ConsoleCom com = new ConsoleCom();
+
+
+	public ScriptRunner(DatabaseManipulator scriptManip)
+	{
+		this.scriptManip = scriptManip;
+
+	}
+
+	public void runScript() 
+	{
+		Scanner fileReader = null;
+		FileReader file;
+		String line = null;
+		
+		try
+		{
+		String fileName = com.getInputString("enter file name: ");
+		file = new FileReader(fileName); 
+		fileReader = new Scanner(file);
+
+		}
+		catch (FileNotFoundException e)
+		{
+			com.println("invalid file name");
+
+		}
+
+		if(fileReader.hasNext())
+			line = fileReader.nextLine();
+
+		while(line != null)
+		{
+			
+			int doThis = 0;
+			
+			if(line == "cre")
+				doThis = 1;
+			else if(line == "del")
+				doThis = 2;
+			else if (line == "lim")
+				doThis = 3;
+			else if (line == "pur")
+				doThis = 4;
+
+			switch (doThis)
+			{
+			case 1:
+				String name = fileReader.nextLine();
+				String account = fileReader.nextLine();
+				String l = fileReader.nextLine();
+				double limit = Double.parseDouble(l);
+				String b = fileReader.nextLine();
+				double balance = Double.parseDouble(b);
+
+				Account newAccount = new Account (name, account, limit, balance);
+				scriptManip.addAccount(newAccount);
+				
+				if(fileReader.hasNext())
+					line = fileReader.nextLine();
+				break;
+
+			case 2:	
+				String accountToDelete = fileReader.nextLine();
+				scriptManip.deleteAccount(accountToDelete);
+				
+				if(fileReader.hasNext())
+					line = fileReader.nextLine();
+				break;
+
+			case 3:
+				String cardLim = fileReader.nextLine();
+				String lim = fileReader.nextLine();
+				double newLimit = Double.parseDouble(lim);
+
+				scriptManip.changeLimit(cardLim, newLimit);
+				
+				if(fileReader.hasNext())
+					line = fileReader.nextLine();
+				break;
+
+			case 4:
+				String cardPur = fileReader.nextLine();
+				String a = fileReader.nextLine();
+				double amount = Double.parseDouble(a);
+
+				scriptManip.makePurchase(cardPur, amount);
+
+				if(fileReader.hasNext())
+					line = fileReader.nextLine();
+				break;
+
+			}
+
+		}
+
+	}
+}
+
+

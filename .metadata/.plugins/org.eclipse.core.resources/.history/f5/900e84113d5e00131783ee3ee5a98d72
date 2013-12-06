@@ -1,0 +1,67 @@
+package database;
+/**
+ * 
+ */
+
+/**
+ * @author Amanda
+ *
+ */
+public class Account {
+
+	private String name;
+	private String accountNumber;
+	private double creditLimit;
+	private double balance;
+
+
+	public Account (String n, String aN, double cL, double bal)
+	{
+		name = n;
+		accountNumber = aN;
+		creditLimit = cL;
+		balance = bal;
+
+	}
+
+	public String toString()
+	{
+		String format = "%-25s %-16s %-12.2f %-8.2f \n";
+		String accountString = String.format(format, name, accountNumber, creditLimit, balance );
+
+		return accountString;
+
+	}
+
+	public double getCreditLimit() {
+		return creditLimit;
+	}
+
+	public void setCreditLimit(double creditLimit) {
+		this.creditLimit = creditLimit;
+	}
+
+	public double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+
+	public void addPurchaseToBalance(double newPurchaseAmount)
+	{
+		balance = balance + newPurchaseAmount;
+
+	}
+
+	public String getName() {
+		return name;
+	}
+
+
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+
+}
